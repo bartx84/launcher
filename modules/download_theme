@@ -1,0 +1,43 @@
+#!/bin/bash
+#universal and modular bash application launcher
+#https://github.com/bartx84/launcher
+#bartx [at] mail.com
+#
+#Module
+#launcher theme downloader
+
+#import the global functions library
+source ../../../core/glb_functions.sh
+#import the application paths
+get_paths 3
+#import the required libraries
+import_lib net_functions.sh colors.sh themes.sh
+
+ 
+function download_theme_gui() {
+ 
+ echo -e "\e[1;32m       _                        _               "
+ echo -e "      | | __ _ _   _ _ __   ___| |__   ___ _ __ "
+ echo -e "      | |/ _' | | | | '_ \ / __| '_ \ / _ \ '__|"
+ echo -e "      | | (_| | |_| | | | | (__| | | |  __/ |   "
+ echo -e "      |_|\__,_|\__,_|_| |_|\___|_| |_|\___|_|   "
+ echo -e "                       version $version by bartx ${NC}"
+ echo -e "                       http://github/bartx84/launcher"
+ echo -e " "
+ echo -e "${RED}\t\tGET THEME FROM GITHUB REPOSITORY${NC}"
+ echo ""
+ echo -e "${GREEN}Please insert the link of the repository or press b to retour to launcher${NC}"
+ read downloadlink
+ if [ "$downloadlink" == "b" ]
+ then 
+ exit
+ elif [ "$downloadlink" != "" ]
+ then 
+ download_theme $downloadlink
+ else 
+ clear
+ echo -e "${RED}Please insert a valid link, or press b to return to louncher${NC}"
+ download_theme_gui
+ fi
+}
+download_theme_gui

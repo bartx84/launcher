@@ -1,0 +1,122 @@
+#!/bin/bash
+#universal and modular bash application launcher
+#https://github.com/bartx84/launcher
+#bartx [at] mail.com
+#
+#Module
+#Service manager
+
+#import the global functions library
+source ../../../core/glb_functions.sh
+#import the application paths
+get_paths 3
+#import the required libraries
+import_lib net_functions.sh colors.sh services.sh
+
+original_path=$(pwd)
+service_dir="$maindir/modules/services"
+  
+ function add_service() {
+ echo -e "Please enter service name [eg: apache2]: "
+ read service_name
+ (exec echo $service_name > $service_dir/$service_name)
+ clear
+ services_menu
+ }	
+ 
+ function rem_service() {
+ echo -e "Please enter service name [eg: apache2]: "
+ read service_name1
+ (exec rm $service_dir/$service_name1)
+ clear
+ services_menu
+ }	
+ 
+ 
+function list_services() {
+ declare -a gettitle
+ spworkdir=$1
+ echo -e "\e[1;32m       _                        _               "
+ echo -e "      | | __ _ _   _ _ __   ___| |__   ___ _ __ "
+ echo -e "      | |/ _' | | | | '_ \ / __| '_ \ / _ \ '__|"
+ echo -e "      | | (_| | |_| | | | | (__| | | |  __/ |   "
+ echo -e "      |_|\__,_|\__,_|_| |_|\___|_| |_|\___|_|   "
+ echo -e "                       version $(cat "$maindir/version") by bartx ${NC}"
+ echo -e "                       http://github/bartx84/launcher"
+ echo -e " "
+ echo -e "${RED}\t\tSERVICES MANAGER${NC}"
+ echo ""
+ echo -e "${WHITE_ON_GREEN}SERVICE\t\tSTATUS\t\t\tACTION${NC}"
+ echo ""
+ count=0
+			 for i in $(cd $spworkdir && ls)
+			 do
+			 declare -a files
+			 files=( `echo "$i"`)
+			 filename=${files[0]}
+			 filename_men=$filename
+			 file_men[$count]=$filename
+			 tlenfile=${#filename}
+			 service_name[$count]=$(cat $service_dir/$filename)
+			 serve_stat=$(service_status ${service_name[$count]})
+			 echo -e "$(regolarize_names $filename 20)\t$serve_stat\t\t\t[$count] - $(service_action $filename)"
+			 let count=count+1
+			 done
+			 cd $original_path
+		 echo ""
+		 echo -e "${GREEN}[a] - Add service to the service monitor${NC}"
+		 echo -e "${RED}[r] - Remove service from the service monitor${NC}"
+		 echo ""
+		 echo -e "${CYAN}[c] - Start rcconf to manage services startup${NC}"
+		 echo ""
+		 echo -e "${YELLOW}[b] - back to previus menu${NC}"
+		 echo ""
+		 echo -e -n "Enter selection:"
+ }
+ 
+function services_menu() {
+
+list_services $service_dir
+
+tLen=${#file_men[@]}
+			until [ "$selection" = "b" ]; do
+			  read selection
+			  re='^[0-9]+$'
+			  if [ "$selection" = "a" ]
+			  then add_service
+			  elif [ "$selection" = "r" ]
+			  then rem_service
+			  elif [ "$selection" = "c" ]
+			  then rcconf_s
+			  elif ! [[ $selection =~ $re ]] 
+			  then
+			  clear
+			  list_services $service_dir
+			  elif  (("$selection" < "${tLen}"))
+			  then 
+			  clear
+			  swich_service ${file_men[$selection]}
+			  else
+			  clear
+			  list_services $service_dir
+			  fi  
+			  done
+}
+
+function swich_service() {
+  action=$(service_action $1)
+ (exec /etc/init.d/$1 $action) 
+  wait $!  
+  clear
+  services_menu
+}	
+
+function rcconf_s() {
+  action=$(service_action $1)
+ (exec rcconf $action) 
+  wait $!  
+  clear
+  services_menu
+}	
+
+services_menu

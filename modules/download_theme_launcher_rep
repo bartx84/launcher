@@ -1,0 +1,76 @@
+#!/bin/bash
+#universal and modular bash application launcher
+#https://github.com/bartx84/launcher
+#bartx [at] mail.com
+#
+#Module
+#launcher theme downloader
+
+#import the global functions library
+source ../../../core/glb_functions.sh
+#import the application paths
+get_paths 3
+#import the required libraries
+import_lib net_functions.sh colors.sh themes.sh
+
+
+function download_officials_themes() {
+ 
+ echo -e "\e[1;32m       _                        _               "
+ echo -e "      | | __ _ _   _ _ __   ___| |__   ___ _ __ "
+ echo -e "      | |/ _' | | | | '_ \ / __| '_ \ / _ \ '__|"
+ echo -e "      | | (_| | |_| | | | | (__| | | |  __/ |   "
+ echo -e "      |_|\__,_|\__,_|_| |_|\___|_| |_|\___|_|   "
+ echo -e "                       version $(cat "$maindir/version") by bartx ${NC}"
+ echo -e "                       http://github/bartx84/launcher"
+ echo -e " "
+ echo -e "${RED}\t\tGET THEMES FROM OFFICIAL GITHUB REPOSITORY${NC}"
+ echo ""
+ echo -e "${GREEN}AVAILABLE THEMES${NC}"
+ declare -a split_rep
+ declare -a downloads_links
+ declare -a theme_names
+ declare -a theme_descriptions
+ 
+if [ -e "$themes_dir/repositories" ]
+then
+declare -a available_themes
+available_themes=( `cat "$themes_dir/repositories" | tr '\n' ' '`)  
+fi
+  
+ 
+ count=0
+ tlenrep=${#available_themes[@]}
+		 for ((i=0; i<$tlenrep; i++))
+		 do
+		 split_rep=( `echo "${available_themes[$i]}" | tr ';' '\n'`)  
+		 downloads_links[$i]=${split_rep[0]}
+		 theme_name=$(get_theme_name ${split_rep[0]})
+		 theme_description=( `echo ${split_rep[1]}`)
+		 echo -e "[$i] - $theme_name - $theme_description"
+		 done 
+ echo -e ""
+ echo -e "${YELLOW}[b] - back to main menu${NC}"
+ echo -e -n "Please chose a theme to download:"
+
+			until [ "$selection" = "b" ]; do
+			  read selection
+			  re='^[0-9]+$'
+			  if ! [[ $selection =~ $re ]] 
+			  then
+			  clear
+			  download_officials_themes
+			  elif  (("$selection" < "${tlenrep}"))
+			  then 
+			  clear
+			  download_theme ${downloads_links[$selection]}
+			  download_officials_themes
+			  else
+			  clear
+			  download_officials_themes
+			  fi  
+			  done
+ 
+ }
+
+download_officials_themes

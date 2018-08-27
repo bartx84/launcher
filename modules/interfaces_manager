@@ -1,0 +1,102 @@
+#!/bin/bash
+#universal and modular bash application launcher
+#https://github.com/bartx84/launcher
+#bartx [at] mail.com
+#
+#Module
+#Service manager
+
+#import the global functions library
+source ../../../core/glb_functions.sh
+#import the application paths
+get_paths 3
+#import the required libraries
+import_lib globals.sh net_functions.sh colors.sh services.sh banner.sh
+. $maindir/modules/interfaces_manager_libs/mac_chang.sh
+
+import_net_interfaces_options
+monitor_mode_check
+
+function switch_int_men()
+{
+intcomm=$(switch_interface $wlan)
+declare -a idetails
+idetails=( `echo "$intcomm" | tr ':' '\n'`)  
+wlanmen=${idetails[0]}
+wlanact="${idetails[2]} ${idetails[3]} ${idetails[4]}"
+eintcomm=$(switch_interface $eth)
+declare -a edetails
+edetails=( `echo "$eintcomm" | tr ':' '\n'`)  
+ethmen=${edetails[0]}
+ethact="${edetails[2]} ${edetails[3]} ${edetails[4]}"
+}
+
+switch_int_men
+
+
+function net_manager_control()
+{
+if [ "$nmstatus" = "STOPPED" ]
+then
+echo "u"
+elif [ "$nmstatus" = "ACTIVE" ]
+then
+echo "s"
+fi
+}
+
+function select_iface()
+{
+if [ "$monmenustatus" = "OFF" ]
+then
+echo $wlan
+elif [ "$monmenustatus" = "ON" ]
+then
+echo $mon
+fi
+}
+
+function wifii_menu()
+{
+  monitor_mode_check
+  
+nmstatus=$(service_action network-manager)
+  
+  
+  maciface=$(select_iface)
+  clear
+  print_banner
+  echo -e "\t\t${RED}INTERFACES MANAGER${NC}"
+  echo -e "Network manager status:$(service_status network-manager)"
+  echo -e "\t\t${YELLOW}$maciface MAC${NC}"
+  echo -e  "$(macchanger -s $maciface)"
+  echo -e  ""
+  echo -e "[1] - $monmenuitem\t[4] - $wlanmen $wlan "
+  echo -e "[2] - Change MAC\t\t[5] - $ethmen $eth"
+  echo -e "[3] - $nmstatus Network Manager\t[6] - Reconfigure interfaces names"
+
+  echo ""
+  echo -e "${YELLOW}[b] - Back to previous menu${NC}"
+  echo ""
+  echo -e -n "Enter selection: ${NC}"
+
+selection=
+until [ "$selection" = "b" ]; do
+  read selection
+  echo ""
+  case $selection in
+   
+  1 ) $moncommand;clear;wifii_menu;;
+  2 ) changemacmenu;;
+  3 ) service network-manager $nmstatus;clear;wifii_menu;;
+  4 ) $wlanact;clear;switch_int_men;wifii_menu;;
+  5 ) $ethact;clear;switch_int_men;wifii_menu;;
+  6 ) config_net_iterfaces;clear;switch_int_men;wifii_menu;;
+ 
+  b ) exit ;;
+  * ) echo -e "Invaliid command"
+  esac
+done
+}
+
+wifii_menu

@@ -1,0 +1,77 @@
+#!/bin/bash
+#universal and modular bash application launcher
+#https://github.com/bartx84/launcher
+#bartx [at] mail.com
+#
+#Module
+#launcher theme switcher
+
+#import the global functions library
+source ../../../core/glb_functions.sh
+#import the application paths
+get_paths 3
+#import the required libraries
+import_lib net_functions.sh colors.sh
+
+original_path=$(pwd)
+declare -a theme_men
+ 
+function list_themes() {
+
+ declare -a gettitle
+ spworkdir=$themes_dir
+ 
+ echo -e "\e[1;32m       _                        _               "
+ echo -e "      | | __ _ _   _ _ __   ___| |__   ___ _ __ "
+ echo -e "      | |/ _' | | | | '_ \ / __| '_ \ / _ \ '__|"
+ echo -e "      | | (_| | |_| | | | | (__| | | |  __/ |   "
+ echo -e "      |_|\__,_|\__,_|_| |_|\___|_| |_|\___|_|   "
+ echo -e "                       version $(cat "$maindir/version") by bartx ${NC}"
+ echo -e "                       http://github/bartx84/launcher"
+ echo -e " "
+ echo -e "${RED}\t\tTHEMES MANAGER${NC}"
+ echo ""
+ echo -e "${GREEN}Current theme:${YELLOW}$(cat $theme_file)${NC}"
+ echo ""
+ count=0
+			 for i in $(cd $spworkdir && ls -d */)
+			 do
+			 declare -a themes
+			 themes=( `echo "$i" | tr '/' '\n'`)
+			 themename=${themes[0]}
+			 theme_men[$count]=$themename
+					 
+			 echo -e "[$count] - $themename"
+			 let count=count+1
+			 done
+			 cd $original_path
+		 echo ""
+		 echo -e "${YELLOW}[b] - back to main menu${NC}"
+		 echo -e -n "Please chose a theme to activate:"
+ }
+ 
+function switch_local_theme() {
+cd ..
+list_themes $1
+
+tLen=${#theme_men[@]}
+			until [ "$selection" == "b" ]; do
+			  read selection
+			  re='^[0-9]+$'
+			  if ! [[ $selection =~ $re ]] 
+			  then
+			  clear
+			  list_themes $mythemes_dir
+			  elif  (("$selection" < "${tLen}"))
+			  then
+			  cd ..
+			  echo ${theme_men[$selection]} > $theme_file
+			  clear
+			  list_themes $mythemes_dir
+			  else
+			  clear
+			  list_themes $mythemes_dir
+			  fi  
+			  done
+}
+switch_local_theme themes

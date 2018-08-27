@@ -1,0 +1,16 @@
+#!/bin/bash
+#universal and modular bash application launcher
+#https://github.com/bartx84/launcher
+#bartx [at] mail.com
+#
+#Module
+#Ssh filesystem mounter
+
+echo "Please insert unser@ip_or_domain"
+read login
+echo "Please insert the remote directory (leave blank for user home)"
+read remote
+echo "Please insert the local mountpoint"
+read local
+cicci="$login:$remote $local"
+sshfs $cicci
