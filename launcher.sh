@@ -27,6 +27,7 @@ if [ $USER != 'root' ]; then
 	exit
 fi 
 path_register
+check_install_dependencies
 import_net_interfaces_options
 
 function list_directory() {
@@ -149,27 +150,38 @@ tLen=${#file_men[@]}
 }
 
 function execute() {
+mylaunch=$1
 if [ -n $3 ]
-then 
-declare -a optionss
-optionss=( `echo "$3" | tr ',' '\n'`)
-opt=""
+then
+			if [ $3 == "newterminal" ]
+			then
+			mycommand="xterm"
+			mylaunch="-hold -e $1;bash"
+			else
+			declare -a optionss
+			optionss=( `echo "$3" | tr ',' '\n'`)
+			opt=""
+			mycommand="exec"
+			
+			for i in "${optionss[@]}"
+			do
+			:
+			declare -a arguments
+			arguments=( `echo "$i" | tr '.' '\n'`)
+			echo "Please insert ${arguments[0]}"
+			read target
+			opt="$opt ${arguments[1]} $target"
+			done
+			fi
 
-for i in "${optionss[@]}"
-do
-   :
-   declare -a arguments
-   arguments=( `echo "$i" | tr '.' '\n'`)
-   echo "Please insert ${arguments[0]}"
-   read target
-   opt="$opt ${arguments[1]} $target"
-   done
-fi 
-  
- (exec $1 $opt)
+fi
+  #mypath=$(pwd)
+  #cd $HOME
+ ($mycommand $mylaunch $opt)
   opt="" 
   wait $!  
   clear
+  #cd $mypath
   echo "Press enter to return to launcher"
   read back
   if [ "back = b" ]
@@ -201,6 +213,10 @@ fi
 if [ "$1" == "-t" ] 
 then
 merge_all_themes
+fi
+if [ "$1" == "-d" ] 
+then
+check_install_dependencies
 fi
 exit
 

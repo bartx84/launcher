@@ -77,7 +77,7 @@ function interface_status() {
 wait $! 
 2>/dev/null 1>&2 ifconfig >> /tmp/$1
 wait $!  
-process2=$(cat /tmp/$1 | grep $1)
+process2=$(cat /tmp/$1 | grep "$1 ")
 wait $! 
 if [ -e /tmp/$1 ]
 then 

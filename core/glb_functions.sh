@@ -7,7 +7,7 @@
 #globals functions library
 
 function path_register() {
-if [ -n $workdir/config ]
+if [ ! -d $workdir/config ]
 then 
 mkdir $workdir/config
 fi
@@ -86,4 +86,40 @@ tlenfile=${#varr[@]}
 				 spaces=$spaces" "
 				 done 
 				 echo "$exit_string$spaces"
+}
+
+function check_install_dependencies() {
+if [ -e "$maindir/dependencies" ]
+then
+declare -a dependencies
+dependencies=( `cat "$maindir/dependencies" | tr '\n' ' '`)  
+fi
+ echo -e "${RED}Check dependencies${NC}"
+ count=0
+ tlendep=${#dependencies[@]}
+ 	 for ((i=0; i<$tlendep; i++))
+		 do
+		 split_dep=( `echo "${dependencies[$i]}" | tr ';' '\n'`)  
+		 depname=${split_dep[0]}
+		 dep_rep_type=${split_dep[1]}
+		 dep_rep_source=${split_dep[2]}
+		 declare -a dep_status
+		 dep_status=( `echo "$(whereis $depname)" | tr ':' '\n'`)  
+		 tlendeps=${#dep_status[1]}
+		 
+				if [ $tlendeps == "0" ]
+				then
+					if [ $dep_rep_type == "apt" ]
+					then
+					echo -e "${RED}INSTALLING $depname${NC}"
+					apt install $dep_rep_source -y
+					else 
+					echo -e "${GREEN}$depname installed${NC}"
+					fi
+								
+				else 
+				echo -e "${GREEN}$depname installed${NC}"
+				fi
+		 done 
+
 }

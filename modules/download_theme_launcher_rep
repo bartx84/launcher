@@ -38,7 +38,6 @@ declare -a available_themes
 available_themes=( `cat "$themes_dir/repositories" | tr '\n' ' '`)  
 fi
   
- 
  count=0
  tlenrep=${#available_themes[@]}
 		 for ((i=0; i<$tlenrep; i++))
